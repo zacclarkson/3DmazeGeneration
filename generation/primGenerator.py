@@ -6,51 +6,55 @@
 # -------------------------------------------------------------------
 
 import random
+from typing import List
 from maze.maze3D import Maze3D
 from maze.util import Coordinates3D
 from generation.mazeGenerator import MazeGenerator
-
 
 
 class PrimMazeGenerator(MazeGenerator):
     """
     Prim's algorithm maze generator.  
     """
+
     def generateMaze(self, maze: Maze3D):
         # Initialize cells and add walls between adjacent cells
-        maze.initCells(addWallFlag=True)
+        maze.initCells(True)
 
-        # Choose a random starting cell
-        start_level = random.randint(0, maze.levelNum() - 1)
-        start_row = random.randint(0, maze.rowNum(start_level) - 1)
-        start_col = random.randint(0, maze.colNum(start_level) - 1)
-        start_cell = Coordinates3D(start_level, start_row, start_col)
+        # Get the list of entrances
+        mazeEntrances = maze.getEntrances()
+
+        # Choose a random entrance as the starting cell
+        startCell = random.choice(mazeEntrances)
+        visitedCells = [startCell]
         
-        # Mark the starting cell as part of the maze
-        selected = set()
-        selected.add(start_cell)
+        currCell = startCell
 
-        # Priority queue (or list) of walls adjacent to the cells in the maze
-        walls = maze.neighbourWalls(start_cell)
-        random.shuffle(walls)  # Shuffle for randomness
+# Note: The frontier now stores Coordinates3D (cells)
+        frontier = maze.neighbours(currCell)
 
-        while walls:
-            wall = walls.pop()
-            cell1 = wall.cell1
-            cell2 = wall.cell2
+        while frontier:
+            selectedCell = random.choice(frontier)
 
-            # Check if exactly one of the cells on either side of the wall is in the maze
-            if (cell1 in selected) ^ (cell2 in selected):
-                # Remove the wall to carve a path in the maze
-                maze.removeWall(cell1, cell2)
+            # Find unvisited neighbors of the selected cell, excluding boundary cells
+            unvisitedNeighbors = [neighbor for neighbor in maze.neighbours(selectedCell)
+                                if neighbor not in visitedCells and not maze.isBoundary(neighbor)]
 
-                # Add the new cell to the maze
-                new_cell = cell1 if cell2 in selected else cell2
-                selected.add(new_cell)
+            if unvisitedNeighbors:
+                # Choose a random unvisited neighbor
+                visitedNeighbor = random.choice(unvisitedNeighbors)
 
-                # Add the walls of the new cell to the list
-                new_walls = maze.neighbourWalls(new_cell)
-                random.shuffle(new_walls)
-                walls.extend(new_walls)
+                # Remove the wall between the selected cell and its neighbor
+                maze.removeWall(selectedCell, visitedNeighbor)
 
+                # Update sets and frontier
+                visitedCells.append(selectedCell)
+                frontier.remove(selectedCell)
+                frontier.extend(unvisitedNeighbors)  
+
+            else:
+                # If no unvisited neighbors, remove the cell from the frontier
+                frontier.remove(selectedCell)
         
+        # Set maze generated flag to True when done
+        self.m_mazeGenerated = True
