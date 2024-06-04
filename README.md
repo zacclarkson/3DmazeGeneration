@@ -3,6 +3,18 @@
 
 ## Assignment 2: Exploring Maze Generation and Solving Algorithms
 
+### Overview
+
+- [Overview](#overview)
+- [Learning Outcomes](#learning-outcomes)
+- [Background](#background)
+- [Assessment details](#assessment-details)
+- [Report Structure](#report-structure)
+- [Submission](#submission)
+- [Assessment](#assessment)
+- [Academic integrity and plagiarism (standard warning)](#academic-integrity-and-plagiarism-standard-warning)
+- [Getting Help](#getting-help)
+
 **Assessment Type**: Individual assignment. Submit online via Canvas → Assignments → Assignment 2. Marks awarded for meeting requirements as closely as possible. Clarifications/updates may be made via announcements/assignment FAQ/relevant discussion forums.
 
 **Due Date**: Week 13, June 5, Wednesday 11:59pm
@@ -245,16 +257,4 @@ There are multiple venues to get help. There are weekly consultation hours (see 
 | solving/pledgeSolver.py      | Implementation of the Pledge algorithm solvers. Used for Task B. Please complete the implementation.                                                                                                                                                                                                            |
 | solving/taskCSolver.py       | Implementation of the solver for Task C. Used for Task C. Please complete the implementation.                                                                                                                                                                                                                   |
 | README.txt                   | Please read this first, it mentions how to run the code. No need to modify this file.                                                                                                                                                                                                                            |
-
-### Overview
-
-- [Overview](#overview)
-- [Learning Outcomes](#learning-outcomes)
-- [Background](#background)
-- [Assessment details](#assessment-details)
-- [Report Structure](#report-structure)
-- [Submission](#submission)
-- [Assessment](#assessment)
-- [Academic integrity and plagiarism (standard warning)](#academic-integrity-and-plagiarism-standard-warning)
-- [Getting Help](#getting-help)
 
