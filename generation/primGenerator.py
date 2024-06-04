@@ -15,55 +15,42 @@ from generation.mazeGenerator import MazeGenerator
 class PrimMazeGenerator(MazeGenerator):
     """
     Prim's algorithm maze generator.  
-    TODO: Complete the implementation (Task A)
     """
-	
-
-    def generateMaze(self, maze:Maze3D):
-        # Initialize cells and walls
+    def generateMaze(self, maze: Maze3D):
+        # Initialize cells and add walls between adjacent cells
         maze.initCells(addWallFlag=True)
 
-        # Randomly select a starting cell
+        # Choose a random starting cell
         start_level = random.randint(0, maze.levelNum() - 1)
         start_row = random.randint(0, maze.rowNum(start_level) - 1)
         start_col = random.randint(0, maze.colNum(start_level) - 1)
         start_cell = Coordinates3D(start_level, start_row, start_col)
-
-        # Mark the start cell as visited and initialize the frontier list
-        visited = set()
-        frontier = []
-
-        def add_frontier(cell):
-            for neighbor in maze.neighbours(cell):
-                if neighbor not in visited:
-                    frontier.append((cell, neighbor))
-
-        visited.add(start_cell)
-        add_frontier(start_cell)
-
-        while frontier:
-            # Randomly select a wall from the frontier list
-            cell, neighbor = random.choice(frontier)
-            frontier.remove((cell, neighbor))
-
-            if neighbor not in visited:
-                # Remove the wall between cell and neighbor
-                maze.removeWall(cell, neighbor)
-                visited.add(neighbor)
-                add_frontier(neighbor)
-
-        # Add entrances and exits as needed
-        self.add_entrances_and_exits(maze)
-
-    def add_entrances_and_exits(self, maze: Maze3D):
-        # Example to add a single entrance and exit, modify as needed
-        entrance = Coordinates3D(0, 0, 0)
-        exit = Coordinates3D(maze.levelNum() - 1, maze.rowNum(maze.levelNum() - 1) - 1, maze.colNum(maze.levelNum() - 1) - 1)
         
-        maze.storeEntrance(entrance)
-        maze.storeExit(exit)
-        
-        maze.carveEntrances()
-        maze.carveExits()
+        # Mark the starting cell as part of the maze
+        selected = set()
+        selected.add(start_cell)
+
+        # Priority queue (or list) of walls adjacent to the cells in the maze
+        walls = maze.neighbourWalls(start_cell)
+        random.shuffle(walls)  # Shuffle for randomness
+
+        while walls:
+            wall = walls.pop()
+            cell1 = wall.cell1
+            cell2 = wall.cell2
+
+            # Check if exactly one of the cells on either side of the wall is in the maze
+            if (cell1 in selected) ^ (cell2 in selected):
+                # Remove the wall to carve a path in the maze
+                maze.removeWall(cell1, cell2)
+
+                # Add the new cell to the maze
+                new_cell = cell1 if cell2 in selected else cell2
+                selected.add(new_cell)
+
+                # Add the walls of the new cell to the list
+                new_walls = maze.neighbourWalls(new_cell)
+                random.shuffle(new_walls)
+                walls.extend(new_walls)
 
         
