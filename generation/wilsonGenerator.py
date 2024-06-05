@@ -7,6 +7,7 @@
 # -------------------------------------------------------------------
 
 import random
+from typing import List
 from maze.maze3D import Maze3D
 from maze.util import Coordinates3D
 from generation.mazeGenerator import MazeGenerator
@@ -22,77 +23,63 @@ class WilsonMazeGenerator(MazeGenerator):
         # Initialize cells and add walls between adjacent cells
         maze.initCells(addWallFlag=True)
 
-        # Directions for movement: N, S, E, W, U, D (Up, Down for 3D)
-        DIRECTIONS = {
-            'N': (-1, 0, 0),
-            'S': (1, 0, 0),
-            'E': (0, 1, 0),
-            'W': (0, -1, 0),
-            'U': (0, 0, 1),
-            'D': (0, 0, -1)
-        }
-        OPPOSITE = {
-            'N': 'S', 'S': 'N', 'E': 'W', 'W': 'E', 'U': 'D', 'D': 'U'
-        }
+        unfinishedCells = list(maze.allCells())
+        
 
-        # Select a random starting cell
-        start_level = random.randint(0, maze.levelNum() - 1)
-        start_row = random.randint(0, maze.rowNum(start_level) - 1)
-        start_col = random.randint(0, maze.colNum(start_level) - 1)
-        start_cell = Coordinates3D(start_level, start_row, start_col)
-        maze.addVertex(start_cell)
+        startLevel = random.randint(0, maze.levelNum() - 1)
+        startRow = random.randint(0, maze.colNum(startLevel) - 1)
+        startCol = random.randint(0, maze.colNum(startLevel) - 1)
+        startCoord = Coordinates3D(startLevel, startRow, startCol)
 
-        # Mark the starting cell as part of the maze
-        in_maze = {start_cell}
+        finishedCells = set()
+        finishedCells.add(startCoord)
 
-        # Function to check if a coordinate is within bounds
-        def in_bounds(cell):
-            l, r, c = cell.getLevel(), cell.getRow(), cell.getCol()
-            return (0 <= l < maze.levelNum() and
-                    0 <= r < maze.rowNum(l) and
-                    0 <= c < maze.colNum(l))
 
-        # Random walk to find a path from an unvisited cell to the maze
-        while len(in_maze) < maze.cellNum(0) * maze.levelNum():
-            current_level = random.randint(0, maze.levelNum() - 1)
-            current_row = random.randint(0, maze.rowNum(current_level) - 1)
-            current_col = random.randint(0, maze.colNum(current_level) - 1)
-            current_cell = Coordinates3D(current_level, current_row, current_col)
+        while unfinishedCells:
+            # randomly select a cell from unfinishedCells
+            selectedCell = random.choice(unfinishedCells)
+            # perform random walk until destinationCell is reached
+            path = self.walk(maze, selectedCell, finishedCells)
 
-            if current_cell in in_maze:
-                continue
+            # carve path and add to finishedCells
+            for i in range(len(path) - 1):
+                curCell = path[i]
+                if i + 1 < len(path):  # Check if nextCell index is valid
+                    nextCell = path[i + 1]
+                    maze.removeWall(curCell, nextCell)
+                    finishedCells.append(curCell)
+        
+        self.m_mazeGenerated = True
 
-            path = [current_cell]
-            visited = {current_cell: None}
+    
 
-            while current_cell not in in_maze:
-                direction = random.choice(list(DIRECTIONS.keys()))
-                next_level = current_cell.getLevel() + DIRECTIONS[direction][0]
-                next_row = current_cell.getRow() + DIRECTIONS[direction][1]
-                next_col = current_cell.getCol() + DIRECTIONS[direction][2]
-                next_cell = Coordinates3D(next_level, next_row, next_col)
 
-                if in_bounds(next_cell):
-                    if next_cell in visited:
-                        cycle_start = path.index(next_cell)
-                        path = path[:cycle_start + 1]
-                    else:
-                        path.append(next_cell)
-                        visited[next_cell] = direction
-                    current_cell = next_cell
+    def walk(self, maze: Maze3D, startCoord: Coordinates3D, finishedCells: set) -> List[Coordinates3D]:
+        curCell = startCoord
+        path = [curCell]
 
-            # Carve the path into the maze
-            for cell in path:
-                in_maze.add(cell)
-                if visited[cell]:
-                    direction = visited[cell]
-                    prev_cell = Coordinates3D(
-                        cell.getLevel() - DIRECTIONS[direction][0],
-                        cell.getRow() - DIRECTIONS[direction][1],
-                        cell.getCol() - DIRECTIONS[direction][2]
-                    )
-                    maze.removeWall(prev_cell, cell)
-                    in_maze.add(cell)
+        while curCell not in finishedCells:
+            unvisitedNeighbors = [
+                neighbor
+                for neighbor in maze.neighbours(curCell)
+                if maze.checkCoordinates(neighbor) and not maze.isBoundary(neighbor) and neighbor not in path and neighbor not in finishedCells
+            ]
+
+            if unvisitedNeighbors:
+                nextCell = random.choice(unvisitedNeighbors)
+                curCell = nextCell
+                path.append(curCell)
+            else:
+                if path: 
+                    curCell = path.pop()
+                else:
+                    # If the path is empty AND curCell is still not finalized, there's no solution.
+                    return None  # Return None to signal an invalid walk
+        return path
+
+
+        
+        
 
     
 		
