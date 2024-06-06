@@ -76,13 +76,3 @@ class WilsonMazeGenerator(MazeGenerator):
                     # If the path is empty AND curCell is still not finalized, there's no solution.
                     return None  # Return None to signal an invalid walk
         return path
-
-
-        
-        
-
-    
-		
-        
-        
-		
