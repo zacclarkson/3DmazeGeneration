@@ -37,8 +37,16 @@ class PrimMazeGenerator(MazeGenerator):
             selectedCell = random.choice(frontier)
 
             # Find unvisited neighbors of the selected cell, excluding boundary cells
-            unvisitedNeighbors = [neighbor for neighbor in maze.neighbours(selectedCell)
-                                if neighbor not in visitedCells and not maze.isBoundary(neighbor)]
+            unvisitedNeighbors = []
+            for neighbor in maze.neighbours(selectedCell):
+                if (
+                    neighbor not in visitedCells 
+                    and maze.checkCoordinates(neighbor)    # Check if neighbor is within the maze
+                    and maze.hasWall(selectedCell, neighbor) # Check if there is a wall between the cells
+                    and not maze.isBoundary(neighbor) # Check if the neighbor is a boundary cell
+                ):
+                    unvisitedNeighbors.append(neighbor)
+
 
             if unvisitedNeighbors:
                 # Choose a random unvisited neighbor
@@ -57,4 +65,5 @@ class PrimMazeGenerator(MazeGenerator):
                 frontier.remove(selectedCell)
         
         # Set maze generated flag to True when done
+        print(maze)
         self.m_mazeGenerated = True
