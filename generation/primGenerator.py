@@ -30,7 +30,6 @@ class PrimMazeGenerator(MazeGenerator):
         
         currCell = startCell
 
-        # Note: The frontier now stores Coordinates3D (cells)
         frontier = maze.neighbours(currCell)
 
         while frontier:
